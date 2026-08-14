@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { STATUS_ORDER } from "@/lib/types";
+import { moverCartaoTrello } from "@/lib/trello";
 
 const COOKIE_NAME = "tatim_admin_session";
 
@@ -30,14 +31,34 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     atualizacao.notas_internas = body.notas_internas;
   }
 
-  const { error } = await supabaseAdmin
+  if (Object.keys(atualizacao).length === 0) {
+    return NextResponse.json({ ok: false, erro: "Nada para atualizar" }, { status: 400 });
+  }
+
+  const { data, error } = await supabaseAdmin
     .from("pedidos")
     .update(atualizacao)
-    .eq("id", params.id);
+    .eq("id", params.id)
+    .select("id, status, trello_card_id")
+    .single();
 
   if (error) {
     return NextResponse.json({ ok: false, erro: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ ok: true });
+  if (!data) {
+    return NextResponse.json(
+      { ok: false, erro: "Pedido não encontrado (nada foi atualizado)" },
+      { status: 404 }
+    );
+  }
+
+  // Espelha a mudança de status no Trello (se o pedido já tiver um cartão
+  // vinculado). Isso não bloqueia a resposta em caso de falha — o status já
+  // foi salvo no banco, que é a fonte da verdade.
+  if (body.status && data.trello_card_id) {
+    moverCartaoTrello(data.trello_card_id, body.status).catch(() => {});
+  }
+
+  return NextResponse.json({ ok: true, pedido: data });
 }
