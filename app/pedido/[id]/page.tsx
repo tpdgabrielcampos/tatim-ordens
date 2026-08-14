@@ -55,6 +55,7 @@ export default async function PedidoDetalhePage({ params }: { params: { id: stri
               valor={pedido.dentes?.length ? pedido.dentes.join(", ") : "—"}
             />
             <Linha label="Material" valor={pedido.material ?? "—"} />
+            <Linha label="Cor da restauração" valor={pedido.cor_restauracao ?? "—"} />
             <Linha label="Prazo desejado" valor={formatarData(pedido.prazo_desejado)} />
             <Linha label="Observações" valor={pedido.observacoes ?? "—"} multiline />
           </Secao>
