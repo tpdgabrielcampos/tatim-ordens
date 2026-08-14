@@ -30,16 +30,21 @@ create table if not exists pedidos (
   status text not null default 'recebido'
     check (status in (
       'recebido',
-      'em_conferencia',
-      'arquivos_confirmados',
-      'aceito',
-      'em_execucao',
-      'concluido',
+      'standby',
+      'cad',
+      'cam',
+      'finalizacao',
       'entregue',
       'cancelado'
     )),
-  notas_internas text
+  notas_internas text,
+
+  -- id do cartao correspondente no Trello (preenchido automaticamente
+  -- quando o pedido chega, se a integracao estiver configurada)
+  trello_card_id text
 );
+
+create index if not exists idx_pedidos_trello_card_id on pedidos(trello_card_id);
 
 create table if not exists pedido_fotos (
   id uuid primary key default gen_random_uuid(),
