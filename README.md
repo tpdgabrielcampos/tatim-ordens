@@ -2,7 +2,7 @@
 
 Plataforma web simples para:
 
-- **Dentistas** criarem ordens de serviço (`/novo-pedido`): dados do paciente, tipo de trabalho, dentes envolvidos (odontograma clicável), material, prazo, referência ao caso no DS Core, e fotos.
+- **Dentistas** criarem ordens de serviço (`/novo-pedido`): dados do paciente, tipo de trabalho, dentes envolvidos (odontograma clicável), material e cor da restauração (obrigatórios), prazo, referência ao caso no DS Core, e fotos.
 - **Você (laboratório)** acompanhar tudo num painel (`/dashboard`, protegido por senha): lista de casos, filtro por status, e uma tela de detalhe de cada pedido onde dá pra ver as fotos, conferir a referência do DS Core, mudar o status do caso e escrever notas internas.
 
 Sobre o DS Core: não existe integração automática (a DS Core não oferece uma API pública), então o formulário tem um campo onde o dentista informa o nome do paciente / link do compartilhamento no DS Core, e você confere manualmente os arquivos `.ply` por lá — exatamente como já faz hoje.
@@ -71,7 +71,6 @@ Cada pedido passa pelos seguintes status — mudam tanto pela tela de detalhe qu
 4. **CAM**
 5. **Finalização**
 6. **Entregue**
-7. **Cancelado**
 
 ## Integração com o Trello
 
@@ -87,7 +86,7 @@ Com essa integração ativa: todo pedido novo já aparece automaticamente como u
 
 ### Passo 2 — Preparar o board
 
-Crie um board no Trello com uma lista pra cada status: **Recebidos**, **Standby**, **CAD**, **CAM**, **Finalizaçao**, **Entregues**, **Cancelado** (os nomes das listas podem ser o que você quiser — o que importa é o id de cada uma, pegos no próximo passo).
+Crie um board no Trello com uma lista pra cada status: **Recebidos**, **Standby**, **CAD**, **CAM**, **Finalizaçao**, **Entregues** (os nomes das listas podem ser o que você quiser — o que importa é o id de cada uma, pegos no próximo passo).
 
 ### Passo 3 — Pegar os ids das listas
 
@@ -106,7 +105,7 @@ Na Vercel (**Settings → Environment Variables**), adicione:
 - `TRELLO_API_KEY`, `TRELLO_API_TOKEN`, `TRELLO_API_SECRET`
 - `NEXT_PUBLIC_SITE_URL` → `https://SEU-SITE.vercel.app`
 - `TRELLO_WEBHOOK_URL` → `https://SEU-SITE.vercel.app/api/trello/webhook`
-- `TRELLO_LIST_RECEBIDO`, `TRELLO_LIST_STANDBY`, `TRELLO_LIST_CAD`, `TRELLO_LIST_CAM`, `TRELLO_LIST_FINALIZACAO`, `TRELLO_LIST_ENTREGUE`, `TRELLO_LIST_CANCELADO` → os ids do passo 3
+- `TRELLO_LIST_RECEBIDO`, `TRELLO_LIST_STANDBY`, `TRELLO_LIST_CAD`, `TRELLO_LIST_CAM`, `TRELLO_LIST_FINALIZACAO`, `TRELLO_LIST_ENTREGUE` → os ids do passo 3
 
 Depois de adicionar, faça um novo deploy (Vercel → Deployments → ⋯ → Redeploy) pra essas variáveis passarem a valer.
 
