@@ -104,11 +104,31 @@ export default function NovoPedidoPage() {
       setTipoTrabalho(TIPOS_TRABALHO[0]);
     } catch (err) {
       console.error(err);
-      const detalhe = err instanceof Error ? err.message : String(err);
       setErro(
-        `Não consegui enviar a ordem de serviço. Detalhe: ${detalhe}`
+        `Não consegui enviar a ordem de serviço. Detalhe: ${mensagemDeErro(err)}`
       );
       setEstado("erro");
+    }
+  }
+
+  // Extrai uma mensagem legível de qualquer tipo de erro. Erros do Supabase
+  // (PostgrestError) não são instâncias de Error — são objetos simples com
+  // uma propriedade "message" — então "String(err)" neles vira "[object
+  // Object]" e esconde o motivo real da falha.
+  function mensagemDeErro(err: unknown): string {
+    if (err instanceof Error) return err.message;
+    if (
+      err &&
+      typeof err === "object" &&
+      "message" in err &&
+      typeof (err as { message: unknown }).message === "string"
+    ) {
+      return (err as { message: string }).message;
+    }
+    try {
+      return JSON.stringify(err);
+    } catch {
+      return String(err);
     }
   }
 
