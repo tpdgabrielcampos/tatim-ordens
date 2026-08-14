@@ -20,6 +20,7 @@ create table if not exists pedidos (
   tipo_trabalho text not null,
   dentes text[] not null default '{}',
   material text,
+  cor_restauracao text,
   prazo_desejado date,
   observacoes text,
 
@@ -34,8 +35,7 @@ create table if not exists pedidos (
       'cad',
       'cam',
       'finalizacao',
-      'entregue',
-      'cancelado'
+      'entregue'
     )),
   notas_internas text,
 
