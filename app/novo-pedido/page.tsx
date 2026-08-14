@@ -20,10 +20,34 @@ export default function NovoPedidoPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setErro(null);
-    setEstado("enviando");
 
     const form = e.currentTarget;
     const data = new FormData(form);
+
+    // Bloqueio explícito de envio: além do "required" nativo dos campos de
+    // texto (que o navegador já impede de submeter vazio), confere aqui de
+    // novo — cobre o odontograma, que não é um <input> comum — e mostra uma
+    // mensagem clara dizendo exatamente o que falta preencher.
+    const camposObrigatorios: [string, string][] = [
+      ["paciente_nome", "Nome do paciente"],
+      ["dentista_nome", "Seu nome"],
+      ["material", "Material desejado"],
+      ["cor_restauracao", "Cor final da restauração"],
+    ];
+    const faltando = camposObrigatorios
+      .filter(([nomeCampo]) => !String(data.get(nomeCampo) ?? "").trim())
+      .map(([, label]) => label);
+
+    if (dentes.length === 0) {
+      faltando.push("Dentes envolvidos (marque pelo menos um dente no odontograma)");
+    }
+
+    if (faltando.length > 0) {
+      setErro(`Preencha os campos obrigatórios antes de enviar: ${faltando.join(", ")}.`);
+      return;
+    }
+
+    setEstado("enviando");
 
     try {
       // Gera o id no navegador em vez de pedir de volta do banco (.select()):
@@ -165,7 +189,7 @@ export default function NovoPedidoPage() {
 
               <div>
                 <span className="mb-1 block text-sm font-medium text-slate-700">
-                  Dentes envolvidos
+                  Dentes envolvidos <span className="text-rose-500">*</span>
                 </span>
                 <OdontogramaSelector selecionados={dentes} onChange={setDentes} />
               </div>
