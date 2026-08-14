@@ -13,7 +13,6 @@ const STATUS_TO_LIST: Record<StatusPedido, string | undefined> = {
   cam: process.env.TRELLO_LIST_CAM,
   finalizacao: process.env.TRELLO_LIST_FINALIZACAO,
   entregue: process.env.TRELLO_LIST_ENTREGUE,
-  cancelado: process.env.TRELLO_LIST_CANCELADO,
 };
 
 function trelloConfigurado() {
@@ -89,8 +88,7 @@ export async function criarCartaoTrello(pedido: Pedido): Promise<string | null> 
  * Não lança erro se falhar — a atualização do status no banco já aconteceu
  * antes dessa chamada, e o Trello é só um espelho.
  */
-export async function moverCartaoTrello(cardId: string, status: StatusPedido): Promise<boolean> {
-  if (!trelloConfigurado()) return false;
+export async function moverCartaoTrello(cardId: string, status: StatusPedido): Promise<boolean> {  if (!trelloConfigurado()) return false;
   const listId = listIdParaStatus(status);
   if (!listId) return false;
 
