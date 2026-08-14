@@ -39,6 +39,7 @@ export default function NovoPedidoPage() {
         tipo_trabalho: tipoTrabalho,
         dentes,
         material: (data.get("material") as string) || null,
+        cor_restauracao: (data.get("cor_restauracao") as string) || null,
         prazo_desejado: (data.get("prazo_desejado") as string) || null,
         observacoes: (data.get("observacoes") as string) || null,
       });
@@ -172,7 +173,14 @@ export default function NovoPedidoPage() {
               <Campo
                 label="Material desejado"
                 name="material"
+                required
                 placeholder="Ex: Zircônia, e.max, PMMA..."
+              />
+              <Campo
+                label="Cor final da restauração"
+                name="cor_restauracao"
+                required
+                placeholder="Ex: A2, A3.5, BL2..."
               />
               <Campo label="Prazo desejado" name="prazo_desejado" type="date" />
               <label className="flex flex-col gap-1 text-sm">
@@ -217,7 +225,7 @@ export default function NovoPedidoPage() {
             >
               {estado === "enviando" ? "Enviando..." : "Enviar ordem de serviço"}
             </button>
-        </form>
+          </form>
         </div>
       </main>
     </div>
