@@ -64,6 +64,14 @@ export default function NovoPedidoPage() {
         });
       }
 
+      // Cria o cartão no Trello em segundo plano. Se falhar, o pedido já
+      // está salvo mesmo assim — não bloqueia a confirmação pro dentista.
+      fetch("/api/trello/criar-cartao", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pedidoId }),
+      }).catch(() => {});
+
       setEstado("sucesso");
       form.reset();
       setDentes([]);
@@ -209,7 +217,7 @@ export default function NovoPedidoPage() {
             >
               {estado === "enviando" ? "Enviando..." : "Enviar ordem de serviço"}
             </button>
-          </form>
+        </form>
         </div>
       </main>
     </div>
