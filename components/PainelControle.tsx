@@ -16,24 +16,60 @@ export default function PainelControle({
   const router = useRouter();
   const [status, setStatus] = useState<StatusPedido>(statusAtual);
   const [notas, setNotas] = useState(notasIniciais ?? "");
-  const [salvando, setSalvando] = useState(false);
-  const [mensagem, setMensagem] = useState<string | null>(null);
+  const [salvandoStatus, setSalvandoStatus] = useState(false);
+  const [salvandoNotas, setSalvandoNotas] = useState(false);
+  const [erroStatus, setErroStatus] = useState<string | null>(null);
+  const [mensagemNotas, setMensagemNotas] = useState<string | null>(null);
 
   async function salvar(campos: Partial<{ status: StatusPedido; notas_internas: string }>) {
-    setSalvando(true);
-    setMensagem(null);
     const res = await fetch(`/api/pedidos/${pedidoId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(campos),
     });
-    setSalvando(false);
 
-    if (res.ok) {
-      setMensagem("Salvo.");
+    let corpo: { ok: boolean; erro?: string } | null = null;
+    try {
+      corpo = await res.json();
+    } catch {
+      // resposta sem corpo JSON — tratado abaixo pelo res.ok
+    }
+
+    if (!res.ok || !corpo?.ok) {
+      throw new Error(corpo?.erro || "Não consegui salvar. Tente novamente.");
+    }
+  }
+
+  async function alterarStatus(novo: StatusPedido) {
+    const anterior = status;
+    setStatus(novo); // atualização otimista — revertida abaixo se falhar
+    setSalvandoStatus(true);
+    setErroStatus(null);
+
+    try {
+      await salvar({ status: novo });
       router.refresh();
-    } else {
-      setMensagem("Não consegui salvar. Tente novamente.");
+    } catch (err) {
+      // Reverte o dropdown pro status real: sem isso, a tela mostra um
+      // status que na verdade não foi salvo no banco.
+      setStatus(anterior);
+      setErroStatus(err instanceof Error ? err.message : "Não consegui salvar. Tente novamente.");
+    } finally {
+      setSalvandoStatus(false);
+    }
+  }
+
+  async function salvarNotas() {
+    setSalvandoNotas(true);
+    setMensagemNotas(null);
+    try {
+      await salvar({ notas_internas: notas });
+      setMensagemNotas("Notas salvas.");
+      router.refresh();
+    } catch (err) {
+      setMensagemNotas(err instanceof Error ? err.message : "Não consegui salvar. Tente novamente.");
+    } finally {
+      setSalvandoNotas(false);
     }
   }
 
@@ -45,12 +81,9 @@ export default function PainelControle({
         <span className="font-medium text-slate-700">Status do caso</span>
         <select
           value={status}
-          onChange={(e) => {
-            const novo = e.target.value as StatusPedido;
-            setStatus(novo);
-            salvar({ status: novo });
-          }}
-          className="rounded-md border border-slate-300 px-3 py-2 focus:border-navy focus:outline-none"
+          disabled={salvandoStatus}
+          onChange={(e) => alterarStatus(e.target.value as StatusPedido)}
+          className="rounded-md border border-slate-300 px-3 py-2 focus:border-navy focus:outline-none disabled:opacity-60"
         >
           {STATUS_ORDER.map((s) => (
             <option key={s} value={s}>
@@ -58,6 +91,12 @@ export default function PainelControle({
             </option>
           ))}
         </select>
+        {salvandoStatus && <span className="text-xs text-slate-400">Salvando...</span>}
+        {erroStatus && (
+          <p className="rounded-md bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
+            ⚠ {erroStatus}
+          </p>
+        )}
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
@@ -71,14 +110,22 @@ export default function PainelControle({
         />
       </label>
       <button
-        onClick={() => salvar({ notas_internas: notas })}
-        disabled={salvando}
+        onClick={salvarNotas}
+        disabled={salvandoNotas}
         className="self-start rounded-lg bg-navy px-4 py-2 text-sm font-medium text-white hover:bg-navy/90 disabled:opacity-60"
       >
-        {salvando ? "Salvando..." : "Salvar notas"}
+        {salvandoNotas ? "Salvando..." : "Salvar notas"}
       </button>
 
-      {mensagem && <p className="text-xs text-slate-500">{mensagem}</p>}
+      {mensagemNotas && (
+        <p
+          className={`text-xs ${
+            mensagemNotas === "Notas salvas." ? "text-slate-500" : "font-medium text-rose-700"
+          }`}
+        >
+          {mensagemNotas}
+        </p>
+      )}
     </div>
   );
 }
