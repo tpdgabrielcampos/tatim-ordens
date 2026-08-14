@@ -5,7 +5,6 @@ export const STATUS_ORDER = [
   "cam",
   "finalizacao",
   "entregue",
-  "cancelado",
 ] as const;
 
 export type StatusPedido = (typeof STATUS_ORDER)[number];
@@ -17,7 +16,6 @@ export const STATUS_LABEL: Record<StatusPedido, string> = {
   cam: "CAM",
   finalizacao: "Finalização",
   entregue: "Entregue",
-  cancelado: "Cancelado",
 };
 
 export const STATUS_COLOR: Record<StatusPedido, string> = {
@@ -27,7 +25,6 @@ export const STATUS_COLOR: Record<StatusPedido, string> = {
   cam: "bg-indigo-100 text-indigo-800 border-indigo-300",
   finalizacao: "bg-violet-100 text-violet-800 border-violet-300",
   entregue: "bg-teal-100 text-teal-800 border-teal-300",
-  cancelado: "bg-rose-100 text-rose-800 border-rose-300",
 };
 
 export const TIPOS_TRABALHO = [
@@ -59,6 +56,7 @@ export interface Pedido {
   tipo_trabalho: string;
   dentes: string[];
   material: string | null;
+  cor_restauracao: string | null;
   prazo_desejado: string | null;
   observacoes: string | null;
   dscore_referencia: string | null;
