@@ -4,6 +4,7 @@ import { Pedido, STATUS_ORDER, StatusPedido } from "@/lib/types";
 import StatusBadge from "@/components/StatusBadge";
 import FiltroStatus from "@/components/FiltroStatus";
 import LogoutButton from "@/components/LogoutButton";
+import BotaoExcluirPedido from "@/components/BotaoExcluirPedido";
 
 export const dynamic = "force-dynamic";
 
@@ -76,12 +77,13 @@ export default async function DashboardPage({
               <th className="px-4 py-3">Prazo</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Recebido em</th>
+              <th className="px-4 py-3" />
             </tr>
           </thead>
           <tbody>
             {pedidosFiltrados.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-10 text-center text-slate-400">
+                <td colSpan={8} className="px-4 py-10 text-center text-slate-400">
                   Nenhum pedido encontrado.
                 </td>
               </tr>
@@ -109,6 +111,9 @@ export default async function DashboardPage({
                 </td>
                 <td className="px-4 py-3 text-slate-500">
                   {formatarData(p.created_at)}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <BotaoExcluirPedido pedidoId={p.id} pacienteNome={p.paciente_nome} />
                 </td>
               </tr>
             ))}
