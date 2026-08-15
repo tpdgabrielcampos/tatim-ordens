@@ -62,3 +62,30 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   return NextResponse.json({ ok: true, pedido: data });
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  if (!autorizado(req)) {
+    return NextResponse.json({ ok: false, erro: "Não autorizado" }, { status: 401 });
+  }
+
+  // As fotos do pedido (tabela pedido_fotos) têm "on delete cascade" pro
+  // pedido_id, então apagam junto automaticamente — não precisa apagar
+  // manualmente aqui.
+  const { error, count } = await supabaseAdmin
+    .from("pedidos")
+    .delete({ count: "exact" })
+    .eq("id", params.id);
+
+  if (error) {
+    return NextResponse.json({ ok: false, erro: error.message }, { status: 500 });
+  }
+
+  if (!count) {
+    return NextResponse.json(
+      { ok: false, erro: "Pedido não encontrado (nada foi apagado)" },
+      { status: 404 }
+    );
+  }
+
+  return NextResponse.json({ ok: true });
+}
