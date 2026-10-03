@@ -58,6 +58,8 @@ export interface Pedido {
   material: string | null;
   cor_restauracao: string | null;
   prazo_desejado: string | null;
+  instalacao_agendada: string | null;
+  quem_preencheu: string | null;
   observacoes: string | null;
   dscore_referencia: string | null;
   status: StatusPedido;
