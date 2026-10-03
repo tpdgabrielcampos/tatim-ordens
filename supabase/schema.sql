@@ -22,6 +22,8 @@ create table if not exists pedidos (
   material text,
   cor_restauracao text,
   prazo_desejado date,
+  instalacao_agendada date,
+  quem_preencheu text,
   observacoes text,
 
   -- referencia ao caso no DS Core (preenchido manualmente pelo dentista)

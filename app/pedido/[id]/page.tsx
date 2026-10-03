@@ -46,6 +46,7 @@ export default async function PedidoDetalhePage({ params }: { params: { id: stri
 
           <Secao titulo="Dentista">
             <Linha label="Dentista" valor={pedido.dentista_nome} />
+            <Linha label="Quem preencheu" valor={pedido.quem_preencheu || "—"} />
           </Secao>
 
           <Secao titulo="Trabalho">
@@ -57,6 +58,10 @@ export default async function PedidoDetalhePage({ params }: { params: { id: stri
             <Linha label="Material" valor={pedido.material ?? "—"} />
             <Linha label="Cor da restauração" valor={pedido.cor_restauracao ?? "—"} />
             <Linha label="Prazo desejado" valor={formatarData(pedido.prazo_desejado)} />
+            <Linha
+              label="Instalação agendada"
+              valor={formatarData(pedido.instalacao_agendada)}
+            />
             <Linha label="Observações" valor={pedido.observacoes ?? "—"} multiline />
           </Secao>
 

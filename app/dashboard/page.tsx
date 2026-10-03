@@ -42,7 +42,7 @@ export default async function DashboardPage({
   const pedidosFiltrados = filtro ? pedidos.filter((p) => p.status === filtro) : pedidos;
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-8">
+    <main className="mx-auto max-w-7xl px-6 py-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-navy">Painel de casos</h1>
@@ -66,7 +66,7 @@ export default async function DashboardPage({
         <FiltroStatus contagens={contagens} />
       </div>
 
-      <div className="mt-6 overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <div className="mt-6 overflow-x-auto rounded-lg border border-slate-200 bg-white">
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <tr>
@@ -75,6 +75,8 @@ export default async function DashboardPage({
               <th className="px-4 py-3">Trabalho</th>
               <th className="px-4 py-3">Dentes</th>
               <th className="px-4 py-3">Prazo</th>
+              <th className="px-4 py-3">Instalação</th>
+              <th className="px-4 py-3">Preenchido por</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Recebido em</th>
               <th className="px-4 py-3" />
@@ -83,7 +85,7 @@ export default async function DashboardPage({
           <tbody>
             {pedidosFiltrados.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-10 text-center text-slate-400">
+                <td colSpan={10} className="px-4 py-10 text-center text-slate-400">
                   Nenhum pedido encontrado.
                 </td>
               </tr>
@@ -106,6 +108,10 @@ export default async function DashboardPage({
                 <td className="px-4 py-3 text-slate-600">
                   {formatarData(p.prazo_desejado)}
                 </td>
+                <td className="px-4 py-3 text-slate-600">
+                  {formatarData(p.instalacao_agendada)}
+                </td>
+                <td className="px-4 py-3 text-slate-600">{p.quem_preencheu || "—"}</td>
                 <td className="px-4 py-3">
                   <StatusBadge status={p.status} />
                 </td>

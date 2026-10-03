@@ -31,6 +31,7 @@ export default function NovoPedidoPage() {
     const camposObrigatorios: [string, string][] = [
       ["paciente_nome", "Nome do paciente"],
       ["dentista_nome", "Seu nome"],
+      ["quem_preencheu", "Quem preencheu"],
       ["material", "Material desejado"],
       ["cor_restauracao", "Cor final da restauração"],
     ];
@@ -65,6 +66,8 @@ export default function NovoPedidoPage() {
         material: (data.get("material") as string) || null,
         cor_restauracao: (data.get("cor_restauracao") as string) || null,
         prazo_desejado: (data.get("prazo_desejado") as string) || null,
+        instalacao_agendada: (data.get("instalacao_agendada") as string) || null,
+        quem_preencheu: String(data.get("quem_preencheu") ?? "").trim(),
         observacoes: (data.get("observacoes") as string) || null,
       });
 
@@ -96,6 +99,15 @@ export default function NovoPedidoPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pedidoId }),
       }).catch(() => {});
+
+      // Envia o pedido para a planilha Google, também em segundo plano. Se
+      // falhar, o pedido já está salvo no site — o erro só fica registrado.
+      fetch("/api/planilha/enviar-pedido", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pedidoId }),
+        keepalive: true,
+      }).catch((e) => console.error("Falha ao enviar para a planilha:", e));
 
       setEstado("sucesso");
       form.reset();
@@ -185,6 +197,12 @@ export default function NovoPedidoPage() {
                 Seus dados (dentista)
               </legend>
               <Campo label="Seu nome" name="dentista_nome" required />
+              <Campo
+                label="Quem preencheu"
+                name="quem_preencheu"
+                required
+                placeholder="Nome de quem está preenchendo este pedido"
+              />
             </fieldset>
 
             <fieldset className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-4">
@@ -227,6 +245,11 @@ export default function NovoPedidoPage() {
                 placeholder="Ex: A2, A3.5, BL2..."
               />
               <Campo label="Prazo desejado" name="prazo_desejado" type="date" />
+              <Campo
+                label="Data da instalação agendada"
+                name="instalacao_agendada"
+                type="date"
+              />
               <label className="flex flex-col gap-1 text-sm">
                 <span className="font-medium text-slate-700">Observações</span>
                 <textarea
