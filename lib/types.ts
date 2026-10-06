@@ -35,6 +35,7 @@ export const TIPOS_TRABALHO = [
   "Protocolo Provisório",
   "Protocolo PMMA Definitivo",
   "Placa Miorelaxante",
+  "Guia Cirúrgico",
 ];
 
 export interface PedidoFoto {
