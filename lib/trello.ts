@@ -3,10 +3,13 @@ import { Pedido, StatusPedido } from "@/lib/types";
 const TRELLO_API_KEY = process.env.TRELLO_API_KEY ?? "";
 const TRELLO_API_TOKEN = process.env.TRELLO_API_TOKEN ?? "";
 
-// Mapa status -> id da lista no Trello. Cada valor vem de uma variável de
-// ambiente diferente (configuradas na Vercel) porque os ids das listas são
-// específicos do board "GC" do laboratório.
-const STATUS_TO_LIST: Record<StatusPedido, string | undefined> = {
+// Quadro do laboratório no Trello. Pode ser o id completo ou o código curto
+// que aparece na URL do quadro (ex: trello.com/b/yFngSY4y/gc -> "yFngSY4y").
+const TRELLO_BOARD_ID = process.env.TRELLO_BOARD_ID ?? "";
+
+// Ids de lista fixos (opcional). Se uma dessas variáveis estiver definida na
+// Vercel, ela tem prioridade; senão a lista é encontrada pelo NOME no quadro.
+const LISTA_FIXA: Record<StatusPedido, string | undefined> = {
   recebido: process.env.TRELLO_LIST_RECEBIDO,
   standby: process.env.TRELLO_LIST_STANDBY,
   cad: process.env.TRELLO_LIST_CAD,
@@ -23,17 +26,94 @@ function authParams() {
   return `key=${TRELLO_API_KEY}&token=${TRELLO_API_TOKEN}`;
 }
 
-/** Id da lista do Trello correspondente a um status. */
-export function listIdParaStatus(status: StatusPedido): string | undefined {
-  return STATUS_TO_LIST[status];
+/** Tira acentos, espaços extras e maiúsculas: "Finalizaçao" -> "finalizacao". */
+function normalizar(texto: string) {
+  return texto
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-/** Status correspondente a um id de lista do Trello (busca reversa). */
-export function statusParaListId(listId: string): StatusPedido | undefined {
-  const entrada = (Object.entries(STATUS_TO_LIST) as [StatusPedido, string | undefined][]).find(
+/** Status correspondente ao nome de uma lista do quadro (ou undefined). */
+function statusPeloNomeDaLista(nome: string): StatusPedido | undefined {
+  const n = normalizar(nome);
+  if (n.startsWith("recebid")) return "recebido";
+  if (n.startsWith("standby") || n.startsWith("stand by")) return "standby";
+  if (n === "cad") return "cad";
+  if (n === "cam") return "cam";
+  if (n.startsWith("finaliza")) return "finalizacao";
+  if (n.startsWith("entregue")) return "entregue";
+  return undefined;
+}
+
+interface ListaTrello {
+  id: string;
+  name: string;
+}
+
+// Cache curto das listas do quadro, pra não consultar o Trello a cada pedido.
+let cacheListas: { listas: ListaTrello[]; em: number } | null = null;
+
+async function listasDoQuadro(): Promise<ListaTrello[]> {
+  if (!trelloConfigurado() || !TRELLO_BOARD_ID) return [];
+  if (cacheListas && Date.now() - cacheListas.em < 5 * 60 * 1000) return cacheListas.listas;
+  try {
+    const res = await fetch(
+      `https://api.trello.com/1/boards/${TRELLO_BOARD_ID}/lists?fields=name&filter=open&${authParams()}`
+    );
+    if (!res.ok) {
+      console.error("Falha ao ler as listas do Trello:", await res.text());
+      return [];
+    }
+    const listas = (await res.json()) as ListaTrello[];
+    cacheListas = { listas, em: Date.now() };
+    return listas;
+  } catch (err) {
+    console.error("Erro ao ler as listas do Trello:", err);
+    return [];
+  }
+}
+
+/**
+ * Id da lista do Trello correspondente a um status. Para "entregue", prefere
+ * a lista do mês atual (ex: "Entregues Outubro") e, se não existir, a
+ * primeira lista que começa com "Entregues".
+ */
+export async function listIdParaStatus(status: StatusPedido): Promise<string | undefined> {
+  if (LISTA_FIXA[status]) return LISTA_FIXA[status];
+  const candidatas = (await listasDoQuadro()).filter(
+    (l) => statusPeloNomeDaLista(l.name) === status
+  );
+  if (status === "entregue" && candidatas.length > 1) {
+    const mes = normalizar(
+      new Date().toLocaleString("pt-BR", { month: "long", timeZone: "America/Sao_Paulo" })
+    );
+    const doMes = candidatas.find((l) => normalizar(l.name).includes(mes));
+    if (doMes) return doMes.id;
+  }
+  return candidatas[0]?.id;
+}
+
+/** Status correspondente a uma lista do Trello (pelo id fixo ou pelo nome). */
+export async function statusParaListId(
+  listId: string,
+  nomeDaLista?: string
+): Promise<StatusPedido | undefined> {
+  const fixa = (Object.entries(LISTA_FIXA) as [StatusPedido, string | undefined][]).find(
     ([, id]) => id === listId
   );
-  return entrada?.[0];
+  if (fixa) return fixa[0];
+  if (nomeDaLista) return statusPeloNomeDaLista(nomeDaLista);
+  const lista = (await listasDoQuadro()).find((l) => l.id === listId);
+  return lista ? statusPeloNomeDaLista(lista.name) : undefined;
+}
+
+/** "2026-10-18" -> "18/10/2026" (sem passar por fuso horário). */
+function dataBR(valor: string) {
+  const [ano, mes, dia] = valor.slice(0, 10).split("-");
+  return ano && mes && dia ? `${dia}/${mes}/${ano}` : valor;
 }
 
 function descricaoCartao(pedido: Pedido) {
@@ -42,7 +122,12 @@ function descricaoCartao(pedido: Pedido) {
     `Trabalho: ${pedido.tipo_trabalho}`,
     pedido.dentes?.length ? `Dentes: ${pedido.dentes.join(", ")}` : null,
     pedido.material ? `Material: ${pedido.material}` : null,
-    pedido.prazo_desejado ? `Prazo desejado: ${pedido.prazo_desejado}` : null,
+    pedido.cor_restauracao ? `Cor: ${pedido.cor_restauracao}` : null,
+    pedido.prazo_desejado ? `Prazo desejado: ${dataBR(pedido.prazo_desejado)}` : null,
+    pedido.instalacao_agendada
+      ? `Instalação agendada: ${dataBR(pedido.instalacao_agendada)}`
+      : null,
+    pedido.quem_preencheu ? `Preenchido por: ${pedido.quem_preencheu}` : null,
     pedido.dscore_referencia ? `Referência DS Core: ${pedido.dscore_referencia}` : null,
     pedido.observacoes ? `Observações: ${pedido.observacoes}` : null,
     "",
@@ -59,7 +144,7 @@ function descricaoCartao(pedido: Pedido) {
  */
 export async function criarCartaoTrello(pedido: Pedido): Promise<string | null> {
   if (!trelloConfigurado()) return null;
-  const listId = listIdParaStatus(pedido.status);
+  const listId = await listIdParaStatus(pedido.status);
   if (!listId) return null;
 
   try {
@@ -88,8 +173,9 @@ export async function criarCartaoTrello(pedido: Pedido): Promise<string | null> 
  * Não lança erro se falhar — a atualização do status no banco já aconteceu
  * antes dessa chamada, e o Trello é só um espelho.
  */
-export async function moverCartaoTrello(cardId: string, status: StatusPedido): Promise<boolean> {  if (!trelloConfigurado()) return false;
-  const listId = listIdParaStatus(status);
+export async function moverCartaoTrello(cardId: string, status: StatusPedido): Promise<boolean> {
+  if (!trelloConfigurado()) return false;
+  const listId = await listIdParaStatus(status);
   if (!listId) return false;
 
   try {
