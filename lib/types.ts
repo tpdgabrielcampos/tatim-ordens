@@ -36,6 +36,7 @@ export const TIPOS_TRABALHO = [
   "Protocolo PMMA Definitivo",
   "Placa Miorelaxante",
   "Guia Cirúrgico",
+  "Impressão de modelo para placa de clareamento",
 ];
 
 export interface PedidoFoto {
