@@ -57,7 +57,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   // vinculado). Isso não bloqueia a resposta em caso de falha — o status já
   // foi salvo no banco, que é a fonte da verdade.
   if (body.status && data.trello_card_id) {
-    moverCartaoTrello(data.trello_card_id, body.status).catch(() => {});
+    await moverCartaoTrello(data.trello_card_id, body.status).catch(() => false);
   }
 
   return NextResponse.json({ ok: true, pedido: data });
