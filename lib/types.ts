@@ -48,6 +48,8 @@ export interface PedidoFoto {
 
 export interface Pedido {
   id: string;
+  // Serviços enviados juntos na mesma ordem de serviço compartilham o os_id.
+  os_id: string | null;
   created_at: string;
   status_updated_at: string;
   paciente_nome: string;
