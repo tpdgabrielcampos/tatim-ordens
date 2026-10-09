@@ -41,6 +41,13 @@ export default async function DashboardPage({
 
   const pedidosFiltrados = filtro ? pedidos.filter((p) => p.status === filtro) : pedidos;
 
+  // Quantos serviços cada OS tem (pra marcar as linhas que fazem parte de uma
+  // OS com mais de um serviço).
+  const servicosPorOs: Record<string, number> = {};
+  for (const p of pedidos) {
+    if (p.os_id) servicosPorOs[p.os_id] = (servicosPorOs[p.os_id] ?? 0) + 1;
+  }
+
   return (
     <main className="mx-auto max-w-7xl px-6 py-8">
       <div className="flex items-center justify-between">
@@ -99,6 +106,11 @@ export default async function DashboardPage({
                   >
                     {p.paciente_nome}
                   </Link>
+                  {p.os_id && (servicosPorOs[p.os_id] ?? 0) > 1 && (
+                    <span className="mt-0.5 block text-xs text-slate-400">
+                      OS com {servicosPorOs[p.os_id]} serviços
+                    </span>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-slate-600">{p.dentista_nome}</td>
                 <td className="px-4 py-3 text-slate-600">{p.tipo_trabalho}</td>
