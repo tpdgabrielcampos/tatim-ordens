@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, ignorado: true });
   }
 
-  const novoStatus = statusParaListId(novaListaId);
+  const novoStatus = await statusParaListId(novaListaId);
   if (!novoStatus) {
     // Cartão foi movido pra uma lista que não corresponde a nenhum status
     // conhecido (ex: uma lista extra criada manualmente no board). Ignora.
