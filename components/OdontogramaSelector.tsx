@@ -47,7 +47,7 @@ export default function OdontogramaSelector({ selecionados, onChange }: Props) {
   }
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+    <div className="overflow-x-auto rounded-lg border border-slate-200 bg-slate-50 p-4">
       <div className="mx-auto flex w-fit flex-col gap-2">
         <div className="flex gap-6">
           <div className="flex gap-1">
