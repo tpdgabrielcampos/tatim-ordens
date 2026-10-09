@@ -18,6 +18,20 @@ async function buscarPedido(id: string): Promise<Pedido | null> {
   return data as Pedido;
 }
 
+// Os outros serviços enviados na mesma ordem de serviço (mesmo os_id).
+async function buscarOutrosServicos(pedido: Pedido): Promise<Pedido[]> {
+  if (!pedido.os_id) return [];
+  const { data, error } = await supabaseAdmin
+    .from("pedidos")
+    .select("id, tipo_trabalho, dentes, status, prazo_desejado")
+    .eq("os_id", pedido.os_id)
+    .neq("id", pedido.id)
+    .order("created_at", { ascending: true });
+
+  if (error || !data) return [];
+  return data as Pedido[];
+}
+
 function formatarData(iso: string | null) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("pt-BR");
@@ -26,6 +40,7 @@ function formatarData(iso: string | null) {
 export default async function PedidoDetalhePage({ params }: { params: { id: string } }) {
   const pedido = await buscarPedido(params.id);
   if (!pedido) notFound();
+  const outrosServicos = await buscarOutrosServicos(pedido);
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-8">
@@ -64,6 +79,28 @@ export default async function PedidoDetalhePage({ params }: { params: { id: stri
             />
             <Linha label="Observações" valor={pedido.observacoes ?? "—"} multiline />
           </Secao>
+
+          {outrosServicos.length > 0 && (
+            <Secao titulo="Outros serviços desta mesma OS">
+              <ul className="flex flex-col divide-y divide-slate-100">
+                {outrosServicos.map((s) => (
+                  <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                    <Link
+                      href={`/pedido/${s.id}`}
+                      className="text-sm font-medium text-navy hover:underline"
+                    >
+                      {s.tipo_trabalho}
+                      {s.dentes?.length ? ` — dentes ${s.dentes.join(", ")}` : ""}
+                    </Link>
+                    <div className="flex items-center gap-3 text-xs text-slate-500">
+                      <span>Prazo: {formatarData(s.prazo_desejado)}</span>
+                      <StatusBadge status={s.status} />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </Secao>
+          )}
 
           {pedido.pedido_fotos && pedido.pedido_fotos.length > 0 && (
             <Secao titulo="Fotos enviadas pelo dentista">
