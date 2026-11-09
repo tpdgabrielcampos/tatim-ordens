@@ -103,3 +103,33 @@ export function pedeCor(caminho: string[]): boolean {
   if (caminho[0] === "Ajuste de cor") return true;
   return (caminho[0] === "PSI" || caminho[0] === "PSD") && !ehPontico(caminho);
 }
+
+/** Todos os serviços "finais" do catálogo (folhas), como caminhos. */
+export function todasAsFolhas(nivel: NoCatalogo[] = CATALOGO, prefixo: string[] = []): string[][] {
+  const saida: string[][] = [];
+  for (const no of nivel) {
+    const caminho = [...prefixo, no.nome];
+    if (no.filhos?.length) saida.push(...todasAsFolhas(no.filhos, caminho));
+    else saida.push(caminho);
+  }
+  return saida;
+}
+
+/** Como o serviço é feito: por dente (elemento), por arcada ou por meia arcada (lado). */
+export type Unidade = "elemento" | "arcada" | "meia arcada";
+
+const POR_ARCADA = new Set(["Protocolo", "Placa miorelaxante", "Impressão de modelo", "Impressão de biomodelo"]);
+
+export function unidadeDoServico(caminho: string[]): Unidade {
+  if (caminho[0] === "Design CAD") {
+    if (caminho[1] === "IBAR meia arcada") return "meia arcada";
+    return caminho[1] === "Protocolo" || caminho[1] === "IBAR" ? "arcada" : "elemento";
+  }
+  return POR_ARCADA.has(caminho[0]) ? "arcada" : "elemento";
+}
+
+/** Prazo mínimo (dias corridos) — usado pelo assistente por voz. */
+export function prazoMinimoDias(caminho: string[]): number {
+  if (caminho[0] === "Design CAD") return caminho[1]?.startsWith("IBAR") ? 1 : 2;
+  return 7;
+}
