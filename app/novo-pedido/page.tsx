@@ -6,6 +6,7 @@ import { PLATAFORMAS_ENVIO } from "@/lib/types";
 import { SEPARADOR, ehPontico, materialDoCaminho, pedeCor } from "@/lib/catalogo";
 import OdontogramaTrabalhos, { COR_CATEGORIA, Marcacoes } from "@/components/OdontogramaTrabalhos";
 import AssistenteVoz, { estadoParaMarcacoes } from "@/components/AssistenteVoz";
+import InstalarApp from "@/components/InstalarApp";
 import type { EstadoVoz } from "@/lib/voz";
 
 type EstadoEnvio = "idle" | "enviando" | "sucesso" | "erro";
@@ -302,15 +303,18 @@ export default function NovoPedidoPage() {
             continuam sendo enviados separadamente pelo DS Core.
           </p>
 
+          <div className="mt-5 flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={() => setVozAberta(true)}
             disabled={estado === "enviando"}
-            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-navy/90 disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-lg bg-navy px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-navy/90 disabled:opacity-60"
           >
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>
             Preencher por voz
           </button>
+          <InstalarApp compacto />
+          </div>
           {preenchidoPorVoz && (
             <p className="mt-3 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
               Preenchido por voz. Confira, complete seu nome, quem preencheu e a plataforma de envio, e envie.
