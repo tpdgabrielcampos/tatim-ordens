@@ -6,6 +6,7 @@ import { PLATAFORMAS_ENVIO } from "@/lib/types";
 import { SEPARADOR, ehPontico, materialDoCaminho, pedeCor } from "@/lib/catalogo";
 import OdontogramaTrabalhos, { COR_CATEGORIA, Marcacoes } from "@/components/OdontogramaTrabalhos";
 import AssistenteVoz, { estadoParaMarcacoes } from "@/components/AssistenteVoz";
+import MascoteLateral from "@/components/MascoteLateral";
 import InstalarApp from "@/components/InstalarApp";
 import type { EstadoVoz } from "@/lib/voz";
 
@@ -284,6 +285,7 @@ export default function NovoPedidoPage() {
 
   return (
     <div className={FUNDO_PAGINA}>
+      <MascoteLateral humor={vozAberta ? "animado" : preenchidoPorVoz ? "amei" : "feliz"} onTocar={() => setVozAberta(true)} />
       <main className="mx-auto max-w-2xl px-6 py-10">
         <div className="mb-6 flex justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
