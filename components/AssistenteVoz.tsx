@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CATALOGO, SEPARADOR, todasAsFolhas, unidadeDoServico } from "@/lib/catalogo";
+import { CATALOGO, SEPARADOR, todasAsFolhas, unidadeDoServico, ehTrabalhoDeArcada } from "@/lib/catalogo";
 import { ORDEM_DENTES } from "@/lib/odontograma";
 import { CONFIG_PADRAO, DICA, PERGUNTAS, pergunta as sortearPergunta, type ConfigVoz, type EstadoVoz, type EtapaVoz, type RespostaVoz } from "@/lib/voz";
 import {
@@ -69,8 +69,19 @@ const FIXAS: Set<string> = (() => {
 
 export function estadoParaMarcacoes(estado: EstadoVoz): Marcacoes {
   const m: Marcacoes = {};
-  for (const t of estado.trabalhos) for (const d of t.dentes) m[d] = t.servico.split(SEPARADOR);
+  for (const t of estado.trabalhos) {
+    const c = t.servico.split(SEPARADOR);
+    if (ehTrabalhoDeArcada(c)) continue; // placa / modelo ficam na lista à parte
+    for (const d of t.dentes) m[d] = c;
+  }
   return m;
+}
+
+/** Placa / impressão de modelo do estado da voz (não ocupam os dentes). */
+export function estadoParaArcadas(estado: EstadoVoz) {
+  return estado.trabalhos
+    .filter((t) => ehTrabalhoDeArcada(t.servico.split(SEPARADOR)))
+    .map((t) => ({ chave: t.servico, caminho: t.servico.split(SEPARADOR), dentes: t.dentes }));
 }
 
 const dataFalada = (iso: string) => {
@@ -540,8 +551,10 @@ export default function AssistenteVoz({ inicial, onAplicar, onFechar }: Props) {
       ? e.trabalhos.map((t) => (t === existente ? { ...t, dentes: ORDEM_DENTES.filter((d) => t.dentes.includes(d) || dentes.includes(d)) } : t))
       : [...e.trabalhos, { servico, dentes, retrabalho: r.retrabalho }];
     // outro trabalho já usava algum desses dentes? o novo vale
+    // (placa e impressão de modelo não ocupam os dentes: convivem com os outros trabalhos)
+    const deArcada = (sv: string) => ehTrabalhoDeArcada(sv.split(SEPARADOR));
     const limpos = trabalhos
-      .map((t) => (t.servico === servico ? t : { ...t, dentes: t.dentes.filter((d) => !dentes.includes(d)) }))
+      .map((t) => (t.servico === servico || deArcada(t.servico) || deArcada(servico) ? t : { ...t, dentes: t.dentes.filter((d) => !dentes.includes(d)) }))
       .filter((t) => t.dentes.length > 0);
     const novo = { ...e, trabalhos: limpos };
     mudarEstado(novo);
