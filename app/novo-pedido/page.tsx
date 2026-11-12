@@ -3,9 +3,9 @@
 import { useRef, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabaseClient";
 import { PLATAFORMAS_ENVIO } from "@/lib/types";
-import { SEPARADOR, ehPontico, materialDoCaminho, pedeCor } from "@/lib/catalogo";
+import { SEPARADOR, arcadasDosDentes, ehPontico, materialDoCaminho, pedeCor } from "@/lib/catalogo";
 import OdontogramaTrabalhos, { COR_CATEGORIA, Marcacoes } from "@/components/OdontogramaTrabalhos";
-import AssistenteVoz, { estadoParaMarcacoes } from "@/components/AssistenteVoz";
+import AssistenteVoz, { estadoParaArcadas, estadoParaMarcacoes } from "@/components/AssistenteVoz";
 import MascoteLateral from "@/components/MascoteLateral";
 import InstalarApp from "@/components/InstalarApp";
 import type { EstadoVoz } from "@/lib/voz";
@@ -69,7 +69,20 @@ export default function NovoPedidoPage() {
   const [vozAberta, setVozAberta] = useState(false);
   const [preenchidoPorVoz, setPreenchidoPorVoz] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-  const grupos = agruparMarcacoes(marcacoes);
+  // Placa / impressão de modelo: trabalhos da arcada, à parte do odontograma (convivem com coroas etc.).
+  const [arcadas, setArcadas] = useState<Grupo[]>([]);
+  const gruposDentes = agruparMarcacoes(marcacoes);
+  const grupos = [...gruposDentes, ...arcadas];
+
+  function addArcada(caminho: string[], dentes: string[]) {
+    const chave = caminho.join(SEPARADOR);
+    setArcadas((l) => {
+      const ex = l.find((g) => g.chave === chave);
+      if (!ex) return [...l, { chave, caminho, dentes }];
+      return l.map((g) => (g === ex ? { ...g, dentes: ORDEM_DENTES.filter((d) => g.dentes.includes(d) || dentes.includes(d)) } : g));
+    });
+  }
+  const ehArcada = (chave: string) => arcadas.some((g) => g.chave === chave);
 
   // Campos comuns (não controlados) do formulário, lidos/escritos direto no HTML.
   function campo(nome: string) {
@@ -91,6 +104,7 @@ export default function NovoPedidoPage() {
     const p = campo("paciente_nome");
     if (p) p.value = e.paciente;
     setMarcacoes(estadoParaMarcacoes(e));
+    setArcadas(estadoParaArcadas(e));
     setDetalhes(Object.fromEntries(e.trabalhos.map((t) => [t.servico, { retrabalho: !!t.retrabalho }])));
     setCorCaso(e.cor);
     setPrazoCaso(e.prazo);
@@ -167,7 +181,11 @@ export default function NovoPedidoPage() {
       };
       const varios = grupos.length > 1;
       const trabalhos = grupos.map((g) => {
-        const dentes = varios ? ` (dente${g.dentes.length > 1 ? "s" : ""} ${g.dentes.join(", ")})` : "";
+        const dentes = ehArcada(g.chave)
+          ? ` (arcada ${arcadasDosDentes(g.dentes)})`
+          : varios
+          ? ` (dente${g.dentes.length > 1 ? "s" : ""} ${g.dentes.join(", ")})`
+          : "";
         const retrabalho = detalheDe(g.chave).retrabalho ? " (Retrabalho)" : "";
         return g.chave + dentes + retrabalho;
       });
@@ -179,7 +197,7 @@ export default function NovoPedidoPage() {
           ...comum,
           id: crypto.randomUUID(),
           tipo_trabalho: trabalhos.join(SEPARADOR_TRABALHOS),
-          dentes: ORDEM_DENTES.filter((d) => marcacoes[d]),
+          dentes: ORDEM_DENTES.filter((d) => marcacoes[d]), // placa e modelo aparecem como "arcada" no tipo de trabalho
           material: materiais.join(", ") || null,
           cor_restauracao: casoPedeCor ? corCaso.trim() || null : null,
           prazo_desejado: prazoCaso || null,
@@ -229,6 +247,7 @@ export default function NovoPedidoPage() {
       setEstado("sucesso");
       form.reset();
       setMarcacoes({});
+      setArcadas([]);
       setDetalhes({});
       setCorCaso("");
       setPrazoCaso("");
@@ -354,7 +373,7 @@ export default function NovoPedidoPage() {
                 <span className="mb-1 block text-sm font-medium text-slate-700">
                   Dentes e trabalhos <span className="text-rose-500">*</span>
                 </span>
-                <OdontogramaTrabalhos marcacoes={marcacoes} onChange={setMarcacoes} />
+                <OdontogramaTrabalhos marcacoes={marcacoes} onChange={setMarcacoes} onTrabalhoDeArcada={addArcada} />
               </div>
 
               {grupos.length === 0 ? (
@@ -371,9 +390,21 @@ export default function NovoPedidoPage() {
                           <div>
                             <p className="text-sm font-semibold text-slate-800">{g.chave}</p>
                             <p className="text-xs text-slate-500">
-                              {g.dentes.length === 1 ? "Dente" : "Dentes"} {g.dentes.join(", ")}
+                              {ehArcada(g.chave)
+                                ? `Arcada ${arcadasDosDentes(g.dentes)}`
+                                : `${g.dentes.length === 1 ? "Dente" : "Dentes"} ${g.dentes.join(", ")}`}
                             </p>
                           </div>
+                          {ehArcada(g.chave) && (
+                            <button
+                              type="button"
+                              onClick={() => setArcadas((l) => l.filter((x) => x.chave !== g.chave))}
+                              className="ml-auto text-lg leading-none text-slate-400 hover:text-rose-500"
+                              title="Tirar este trabalho"
+                            >
+                              ×
+                            </button>
+                          )}
                         </div>
                         <label className="mt-3 flex items-center gap-2 text-sm text-slate-700">
                           <input
