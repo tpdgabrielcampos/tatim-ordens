@@ -1,17 +1,21 @@
 import type { Metadata, Viewport } from "next";
+import "@fontsource/sora/400.css";
+import "@fontsource/sora/500.css";
+import "@fontsource/sora/600.css";
+import "@fontsource/sora/700.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "TATIM Laboratório — Ordens de Serviço",
   description: "Envio e controle de ordens de serviço do laboratório TATIM",
   applicationName: "OS TATIM",
-  appleWebApp: { capable: true, title: "OS TATIM", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "OS TATIM", statusBarStyle: "black-translucent" },
   icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
   formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1F3864",
+  themeColor: "#000000",
   width: "device-width",
   initialScale: 1,
 };
@@ -32,7 +36,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen bg-slate-50 text-slate-900">{children}</body>
+      <body className="gc-app min-h-screen text-zinc-200">
+        <div className="gc-ceu" aria-hidden />
+        <div className="relative z-10">{children}</div>
+      </body>
     </html>
   );
 }

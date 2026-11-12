@@ -5,3 +5,144 @@
 html {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ---------- Tema OS digital GC (preto + splash de aquarela da identidade GC) ---------- */
+:root {
+  --gc-roxo: #8f5bd9;
+  --gc-rosa: #e0649c;
+  --gc-ciano: #5fb8cf;
+  --gc-laranja: #f2a43a;
+}
+.gc-app {
+  font-family: "Sora", ui-sans-serif, system-ui, sans-serif;
+  background: #000;
+}
+/* Fundo fixo: o splash fica no canto de baixo à direita, como na identidade visual. */
+.gc-ceu {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: url("/fundo-gc.jpg") right bottom / cover no-repeat;
+  opacity: 0.55;
+}
+.gc-ceu-forte { opacity: 1; }
+.gc-card {
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 10, 12, 0.82);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 24px 48px -28px rgba(0, 0, 0, 0.9);
+}
+.gc-hero {
+  background:
+    radial-gradient(ellipse 40% 120% at 100% 100%, rgba(242, 164, 58, 0.16), transparent 70%),
+    radial-gradient(ellipse 35% 110% at 82% 120%, rgba(224, 100, 156, 0.18), transparent 70%),
+    radial-gradient(ellipse 30% 90% at 65% 130%, rgba(143, 91, 217, 0.22), transparent 70%),
+    rgba(10, 10, 12, 0.88);
+}
+.gc-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--gc-laranja), var(--gc-rosa));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.gc-chip {
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #d4d4d8;
+  white-space: nowrap;
+}
+.gc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.85rem;
+  padding: 0.65rem 1.1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  transition: filter 0.15s, background 0.15s;
+}
+.gc-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.gc-btn-principal {
+  color: #fff;
+  background: linear-gradient(100deg, var(--gc-roxo), var(--gc-rosa) 55%, var(--gc-laranja));
+  box-shadow: 0 12px 30px -12px rgba(224, 100, 156, 0.75);
+}
+.gc-btn-principal:hover { filter: brightness(1.08); }
+.gc-btn-secundario {
+  color: #f4f4f5;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.gc-btn-secundario:hover { background: rgba(255, 255, 255, 0.09); }
+.gc-menu-ativo {
+  background: linear-gradient(90deg, rgba(224, 100, 156, 0.16), rgba(143, 91, 217, 0.06));
+  box-shadow: inset 3px 0 0 var(--gc-rosa);
+}
+.gc-input {
+  width: 100%;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.7rem 0.9rem;
+  color: #fafafa;
+  outline: none;
+}
+.gc-input::placeholder { color: #71717a; }
+.gc-input:focus { border-color: rgba(224, 100, 156, 0.7); box-shadow: 0 0 0 3px rgba(224, 100, 156, 0.15); }
+.gc-tabs { display: inline-flex; gap: 0.25rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.08); background: rgba(10,10,12,0.85); padding: 0.3rem; }
+.gc-tab { border-radius: 0.75rem; padding: 0.45rem 0.9rem; font-size: 0.9rem; font-weight: 600; color: #d4d4d8; }
+.gc-tab-ativa { color: #fff; background: linear-gradient(100deg, var(--gc-roxo), var(--gc-rosa)); }
+.gc-barra { background: linear-gradient(90deg, var(--gc-roxo), var(--gc-rosa), var(--gc-laranja)); }
+
+
+/* ---------- Mesmo visual do OS digital GC ----------
+   As telas deste app foram feitas no tema claro (azul-marinho). Em vez de reescrever
+   cada tela, as cores claras viram as do tema GC aqui (escuro + roxo/rosa/laranja). */
+.gc-app .bg-white { background-color: rgba(255, 255, 255, 0.03); }
+.gc-app .bg-white\/90 { background: rgba(10, 10, 12, 0.82); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 24px 48px -28px rgba(0, 0, 0, 0.9); }
+.gc-app .bg-slate-50, .gc-app .hover\:bg-slate-50:hover { background-color: rgba(255, 255, 255, 0.04); }
+.gc-app .bg-slate-100 { background-color: rgba(255, 255, 255, 0.07); }
+.gc-app .bg-slate-900\/50, .gc-app .bg-black\/40 { background-color: rgba(0, 0, 0, 0.7); }
+.gc-app .bg-navy, .gc-app .bg-navy\/90, .gc-app .hover\:bg-navy\/90:hover {
+  color: #fff;
+  background: linear-gradient(100deg, var(--gc-roxo), var(--gc-rosa) 55%, var(--gc-laranja));
+  box-shadow: 0 12px 30px -12px rgba(224, 100, 156, 0.75);
+}
+.gc-app .hover\:bg-navy\/90:hover { filter: brightness(1.08); }
+.gc-app .bg-navy\/5, .gc-app .hover\:bg-navy\/5:hover { background-color: rgba(224, 100, 156, 0.1); }
+.gc-app .text-navy, .gc-app .hover\:text-navy:hover { color: #fff; }
+.gc-app .text-slate-900, .gc-app .text-slate-800, .gc-app .hover\:text-slate-800:hover { color: #f4f4f5; }
+.gc-app .text-slate-700, .gc-app .hover\:text-slate-700:hover { color: #e4e4e7; }
+.gc-app .text-slate-600 { color: #d4d4d8; }
+.gc-app .text-slate-500 { color: #a1a1aa; }
+.gc-app .text-slate-400 { color: #8b8b94; }
+.gc-app .border-slate-200, .gc-app .border-slate-300 { border-color: rgba(255, 255, 255, 0.1); }
+.gc-app .border-slate-600 { border-color: rgba(255, 255, 255, 0.25); }
+.gc-app .border-navy, .gc-app .hover\:border-navy:hover, .gc-app .focus\:border-navy:focus { border-color: rgba(224, 100, 156, 0.7); }
+.gc-app .border-navy\/40 { border-color: rgba(224, 100, 156, 0.4); }
+.gc-app .ring-navy { --tw-ring-color: #e0649c; }
+.gc-app .ring-offset-1, .gc-app .ring-offset-2 { --tw-ring-offset-color: #000; }
+.gc-app .bg-emerald-50, .gc-app .bg-emerald-100 { background-color: rgba(16, 185, 129, 0.12); }
+.gc-app .text-emerald-700, .gc-app .text-emerald-800 { color: #6ee7b7; }
+.gc-app .bg-rose-50, .gc-app .hover\:bg-rose-50:hover { background-color: rgba(244, 63, 94, 0.12); }
+.gc-app .text-rose-700, .gc-app .text-rose-600, .gc-app .hover\:text-rose-600:hover { color: #fda4af; }
+.gc-app .bg-amber-50 { background-color: rgba(245, 158, 11, 0.12); }
+.gc-app .text-amber-800 { color: #fcd34d; }
+.gc-app input, .gc-app select, .gc-app textarea { color: #fafafa; background-color: rgba(255, 255, 255, 0.04); }
+.gc-app select option { background: #111; color: #fafafa; }
+.gc-app input::placeholder, .gc-app textarea::placeholder { color: #71717a; }
+.gc-app input[type="checkbox"], .gc-app input[type="radio"] { accent-color: #e0649c; background: none; }
+.gc-app input[type="date"] { color-scheme: dark; }
+.gc-app input[type="file"] { background: none; }
+.gc-app legend { padding: 0 0.4rem; }
+/* janelas que abrem por cima (menu do dente, confirmações): fundo sólido */
+.gc-app .bg-white.shadow-xl, .gc-app .bg-white.shadow-2xl { background-color: #121215; border-color: rgba(255, 255, 255, 0.12); }

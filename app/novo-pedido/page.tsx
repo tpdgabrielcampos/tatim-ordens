@@ -53,11 +53,9 @@ function agruparMarcacoes(marcacoes: Marcacoes): Grupo[] {
   return grupos;
 }
 
-const FUNDO_PAGINA =
-  "min-h-screen bg-white bg-[url('/fundo.jpg')] bg-cover bg-center bg-no-repeat bg-fixed";
+const FUNDO_PAGINA = "min-h-screen";
 
-const CLASSE_INPUT =
-  "rounded-md border border-slate-300 px-3 py-2 focus:border-navy focus:outline-none";
+const CLASSE_INPUT = "gc-input";
 
 export default function NovoPedidoPage() {
   const [estado, setEstado] = useState<EstadoEnvio>("idle");
@@ -292,7 +290,7 @@ export default function NovoPedidoPage() {
           <img
             src="/logo-gabriel-campos.png"
             alt="Gabriel Campos"
-            className="w-40 sm:w-48"
+            className="w-40 invert sm:w-48"
           />
         </div>
 
