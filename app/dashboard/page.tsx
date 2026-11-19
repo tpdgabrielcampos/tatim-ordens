@@ -5,6 +5,7 @@ import StatusBadge from "@/components/StatusBadge";
 import FiltroStatus from "@/components/FiltroStatus";
 import LogoutButton from "@/components/LogoutButton";
 import BotaoExcluirPedido from "@/components/BotaoExcluirPedido";
+import AtualizarSozinho from "@/components/AtualizarSozinho";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,7 @@ export default async function DashboardPage({
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-8">
+      <AtualizarSozinho />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-navy">Painel de casos</h1>
