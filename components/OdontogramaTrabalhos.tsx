@@ -39,6 +39,16 @@ function expandirArcadas(dentes: string[]): string[] {
 
 const ehProtocolo = (c?: string[]) => c?.[0] === "Protocolo";
 
+const ehArcadaInteira = (dentes: string[], arcada: string[]) => arcada.every((d) => dentes.includes(d));
+function tituloJanela(dentes: string[]) {
+  const sup = ehArcadaInteira(dentes, ARCADA_SUP);
+  const inf = ehArcadaInteira(dentes, ARCADA_INF);
+  if (sup && inf && dentes.length === 32) return "Arcadas superior e inferior completas";
+  if (sup && dentes.length === 16) return "Arcada superior completa";
+  if (inf && dentes.length === 16) return "Arcada inferior completa";
+  return dentes.length === 1 ? `Dente ${dentes[0]}` : `Dentes ${dentes.join(", ")}`;
+}
+
 /** dente -> caminho escolhido no catálogo (ex: ["PSD", "Coroa", "Dissilicato"]) */
 export type Marcacoes = Record<string, string[]>;
 
@@ -61,6 +71,15 @@ export default function OdontogramaTrabalhos({ marcacoes, onChange, onTrabalhoDe
       setSelecionados((s) => (s.includes(dente) ? s.filter((d) => d !== dente) : [...s, dente]));
     } else {
       abrirJanela([dente]);
+    }
+  }
+
+  /** Botão "arcada completa": abre a janela com a arcada toda (ou marca/desmarca no modo vários). */
+  function marcarArcada(arcada: string[]) {
+    if (modoVarios) {
+      setSelecionados((s) => (arcada.every((d) => s.includes(d)) ? s.filter((d) => !arcada.includes(d)) : Array.from(new Set([...s, ...arcada]))));
+    } else {
+      abrirJanela(arcada);
     }
   }
 
@@ -145,6 +164,19 @@ export default function OdontogramaTrabalhos({ marcacoes, onChange, onTrabalhoDe
 
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 p-2 sm:p-3">
+      <div className="mb-2 flex flex-wrap items-center justify-center gap-2">
+        {[["superior", ARCADA_SUP], ["inferior", ARCADA_INF]].map(([nome, arc]) => (
+          <button
+            key={nome as string}
+            type="button"
+            onClick={() => marcarArcada(arc as string[])}
+            title={`Selecionar a arcada ${nome} inteira`}
+            className="rounded-md border border-navy/40 bg-white text-navy hover:bg-navy/5 px-3 py-1.5 text-xs font-semibold"
+          >
+            Arcada {nome} completa
+          </button>
+        ))}
+      </div>
       <div className="overflow-x-auto">
         <div className="mx-auto flex w-fit flex-col gap-2">
           <div className="flex gap-2">
@@ -211,7 +243,7 @@ export default function OdontogramaTrabalhos({ marcacoes, onChange, onTrabalhoDe
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-lg font-bold text-navy">
-                  {janela.length === 1 ? `Dente ${janela[0]}` : `Dentes ${janela.join(", ")}`}
+                  {tituloJanela(janela)}
                 </h3>
                 <p className="text-xs text-slate-500">
                   {caminho.length === 0 ? "Escolha o tipo de trabalho" : caminho.join(SEPARADOR)}
